@@ -41,6 +41,8 @@ cache:
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
+  tags: 
+    - openshift
   script:
     - 'mvn $MAVEN_CLI_OPTS clean package'
     - echo "Compile complete."
