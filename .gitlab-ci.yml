@@ -19,6 +19,7 @@
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
+  - push
   - deploy
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
@@ -28,6 +29,14 @@ variables:
   # when running from the command line.
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  NAMESPACE: "diod" #MUST be lowercase
+  APP: "diod" #MUST be lowercase
+  INTERNAL_REGISTRY: "image-registry.openshift-image-registry.svc.cluster.local:5000"
+  # REG_CREDS: xxx  (Set Registry Authentication in Gitlab Env variable)
+  # REGISTRY_NAMESPACE: "kevindubois" (set REGISTRY_NAMESPACE in Gitlab Env variable)
+  REGISTRY: "quay.io"
+  DEV_TAG: "dev"
+  PROD_TAG: "latest"
 
 # This template uses jdk8 for verifying and deploying images
 image: maven:3.8.6-jdk-11
@@ -61,9 +70,16 @@ lint-test-job:   # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
+push-job:
+  stage: push
+  script: 
+    - echo "pushing to quay"
+    # - skopeo copy --src-tls-verify=false --src-creds openshift:$(oc whoami -t) --dest-creds ${REG_CREDS} docker://${INTERNAL_REGISTRY}/${NAMESPACE}/${APP}:${DEV_TAG} docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG}
+
+
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   environment: production
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - "oc project $NAMESPACE"
+    - "oc new-app . --name=$APP --strategy=docker"
