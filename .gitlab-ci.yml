@@ -70,11 +70,16 @@ lint-test-job:   # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
+image-create-job:
+  stage: image
+  script:
+    - oc new-app --context-dir='.' --name="$APP" --strategy=docker --code="src/main/docker/"
+
 push-job:
   stage: push
   script: 
     - echo "pushing to quay"
-    # - skopeo copy --src-tls-verify=false --src-creds openshift:$(oc whoami -t) --dest-creds ${REG_CREDS} docker://${INTERNAL_REGISTRY}/${NAMESPACE}/${APP}:${DEV_TAG} docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG}
+    - skopeo copy --src-tls-verify=false --src-creds openshift:$(oc whoami -t) --dest-creds ${REG_CREDS} docker://${INTERNAL_REGISTRY}/${NAMESPACE}/${APP}:${DEV_TAG} docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG}
 
 
 deploy-job:      # This job runs in the deploy stage.
