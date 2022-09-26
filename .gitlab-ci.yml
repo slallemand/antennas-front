@@ -77,11 +77,13 @@ lint-test-job:   # This job also runs in the test stage.
 
 image-create-job:
   stage: build
+  image: quay.io/openshift/origin-cli:4.11
   script:
     - oc new-app --context-dir='.' --name="$APP" --strategy=docker --code="src/main/docker/"
 
 push-job:
   stage: push
+  image: quay.io/skopeo/stable:latest
   script: 
     - echo "pushing to quay"
     - skopeo copy --src-tls-verify=false --src-creds openshift:$(oc whoami -t) --dest-creds ${REG_CREDS} docker://${INTERNAL_REGISTRY}/${NAMESPACE}/${APP}:${DEV_TAG} docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG}
@@ -90,6 +92,7 @@ push-job:
 deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   environment: production
+  image: quay.io/openshift/origin-cli:4.11
   script:
     - "oc project $NAMESPACE"
     - "oc new-app . --name=$APP --strategy=docker"
