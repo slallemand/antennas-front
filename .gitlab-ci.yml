@@ -78,7 +78,7 @@ buildah-job:
   stage: build
   image: quay.io/containers/buildah
   script:
-    - buildah build -t antennas-front:${DEV_TAG} -f src/main/docker/Dockerfile .
+    - export STORAGE_DRIVER=vfs && buildah build -t antennas-front:${DEV_TAG} -f src/main/docker/Dockerfile .
 
 push-job:
   stage: push
