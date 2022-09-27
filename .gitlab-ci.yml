@@ -10,7 +10,6 @@
 #
 # You can copy and paste this template into a new `.gitlab-ci.yml` file.
 # You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
-#dsdsdsd
 # To contribute improvements to CI/CD templates, please follow the Development guide at:
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific template is located at:
@@ -19,8 +18,6 @@
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
-  - image
-  - push
   - deploy
 variables:
   # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
@@ -32,11 +29,6 @@ variables:
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   NAMESPACE: "diod" #MUST be lowercase
   APP: "diod" #MUST be lowercase
-  # REG_CREDS: xxx  (Set Registry Authentication in Gitlab Environment variable)
-  # REGISTRY_NAMESPACE: "kevindubois" (set REGISTRY_NAMESPACE in Gitlab Environment variable)
-  REGISTRY: "quay.io"
-  DEV_TAG: "latest"
-  PROD_TAG: "latest"
 
 # This template uses jdk8 for verifying and deploying images
 image: maven:3.8.6-jdk-11
@@ -88,8 +80,6 @@ deploy:
   dependencies: 
     - maven-build
   script:    
-    - ls -la .
-    - ls -la target
     - oc start-build diod --from-dir=. --follow -n $NAMESPACE
     - if oc expose service diod -n $NAMESPACE; then echo "service exposed"; else echo "service already exposed"; fi
 
