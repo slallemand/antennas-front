@@ -54,11 +54,15 @@ default:
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
-  tags: 
-    - openshift
   script:
     - 'mvn $MAVEN_CLI_OPTS clean package'
     - echo "Compile complete."
+
+build-config-job:
+  stage: build
+  image: quay.io/openshift/origin-cli:4.11
+  script:
+    -  if oc new-build --name="$APP" --binary; then echo "buildconfig created"; else echo "buildconfig already exists - ignoring"; fi
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
@@ -74,34 +78,12 @@ lint-test-job:   # This job also runs in the test stage.
     - sleep 10
     - echo "No lint issues found."
 
-buildah-job:
-  stage: build
-  image: quay.io/containers/buildah
-  script:
-    - export STORAGE_DRIVER=vfs && buildah build -t antennas-front:${DEV_TAG} -f src/main/docker/Dockerfile .
-
-push-job:
-  stage: push
-  image: quay.io/skopeo/stable:latest
-  script: 
-    - echo "pushing to quay"
-    - skopeo copy --dest-creds ${REG_CREDS} docker://antennas-front:${DEV_TAG} docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG}
-
-#potentially some logic to test the pushed image and then promote it to a $PROD_TAG
-# integration-test-job
-#   stage: integration
-#   environment: staging
-#   script:
-#     - "oc project $NAMESPACE-staging"
-#     - "oc new-app --image=${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${DEV_TAG} --name=$APP
-#     - echo "testing on staging environment"
-#     - skopeo copy --dest-creds ${REG_CREDS} docker://antennas-front docker://${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${PROD_TAG}
-
 deploy-job:      
   stage: deploy  
   environment: production
   image: quay.io/openshift/origin-cli:4.11
   script:
-    - "oc project $NAMESPACE"
-    - "oc new-app --image=${REGISTRY}/${REGISTRY_NAMESPACE}/${APP}:${PROD_TAG} --name=$APP"
+    - oc project $NAMESPACE
+    - oc start-build diod --from-dir=. --follow
+    - if oc expose service diod; then echo "service exposed"; else echo "service already exposed"; fi
 
