@@ -71,7 +71,7 @@ unit-test:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
     - echo "Running unit tests... This will take about 60 seconds."
-    # - mvn test
+    - mvn test
     - echo "Code coverage is 90%"
 
 lint-test:   # This job also runs in the test stage.
