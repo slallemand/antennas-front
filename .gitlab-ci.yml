@@ -62,7 +62,7 @@ build-config-job:
   stage: build
   image: quay.io/openshift/origin-cli:4.11
   script:
-    -  if oc new-build --name="$APP" --binary; then echo "buildconfig created"; else echo "buildconfig already exists - ignoring"; fi
+    - if oc new-build --name="$APP" --binary -n $NAMESPACE; then echo "buildconfig created"; else echo "buildconfig already exists - ignoring"; fi
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
@@ -82,8 +82,7 @@ deploy-job:
   stage: deploy  
   environment: production
   image: quay.io/openshift/origin-cli:4.11
-  script:
-    - oc project $NAMESPACE
-    - oc start-build diod --from-dir=. --follow
-    - if oc expose service diod; then echo "service exposed"; else echo "service already exposed"; fi
+  script:    
+    - oc start-build diod --from-dir=. --follow -n $NAMESPACE
+    - if oc expose service diod -n $NAMESPACE; then echo "service exposed"; else echo "service already exposed"; fi
 
