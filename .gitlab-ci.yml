@@ -28,7 +28,7 @@ variables:
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
   NAMESPACE: "diod" #MUST be lowercase
-  APP: "diod" #MUST be lowercase
+  APP: "antennas-front" #MUST be lowercase
 
 # This template uses jdk8 for verifying and deploying images
 image: maven:3.8.6-jdk-11
@@ -80,6 +80,6 @@ deploy:
   dependencies: 
     - maven-build
   script:    
-    - oc start-build diod --from-dir=. --follow -n $NAMESPACE
-    - if oc expose service diod -n $NAMESPACE; then echo "service exposed"; else echo "service already exposed"; fi
+    - oc start-build $APP --from-dir=. --follow -n $NAMESPACE
+    - if oc expose service $APP -n $NAMESPACE; then echo "service exposed"; else echo "service already exposed"; fi
 
