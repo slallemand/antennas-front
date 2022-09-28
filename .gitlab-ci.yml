@@ -57,7 +57,7 @@ build-config:
   stage: build
   image: quay.io/openshift/origin-cli:4.11
   script:
-    - if oc new-build --name="$APP" --binary -n $NAMESPACE; then echo "buildconfig created"; else echo "buildconfig already exists - ignoring"; fi
+    - oc apply -f kubefiles/img-build.yaml
 
 unit-test:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
@@ -81,5 +81,5 @@ deploy:
     - maven-build
   script:    
     - oc start-build $APP --from-dir=. --follow -n $NAMESPACE
-    - if oc expose service $APP -n $NAMESPACE; then echo "service exposed"; else echo "service already exposed"; fi
+    - if oc expose service $APP -n $NAMESPACE; then echo "service exposed"; else echo "ignoring error, service probably already exposed"; fi
 

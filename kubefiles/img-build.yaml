@@ -1,0 +1,118 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: antennas-front:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: git@gitlab.com:redhat-scholars/antennas-front.git
+    type: Git
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: openjdk-11:1.11
+    type: Docker
+  triggers:
+  - github:
+      secret: cUkS3ZymO5IZqovebPTE
+    type: GitHub
+  - generic:
+      secret: c0wLiClWZtM_GAOXQmJ0
+    type: Generic
+  - type: ConfigChange
+  - imageChange:
+      lastTriggeredImageID: registry.access.redhat.com/ubi8/openjdk-11@sha256:ce5c0becf829aca80734b4caf3ab6b76cb00f7d78f4e39fb136636a764dea7f6
+    type: ImageChange
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deployment: antennas-front
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"antennas-front:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"antennas-front\")].image"}]'
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deployment: antennas-front
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: Gitlab
+      labels:
+        deployment: antennas-front
+    spec:
+      containers:
+      - image: ' '
+        imagePullPolicy: IfNotPresent
+        name: antennas-front
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
