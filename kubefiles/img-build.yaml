@@ -33,11 +33,12 @@ spec:
       uri: git@gitlab.com:redhat-scholars/antennas-front.git
     type: Git
   strategy:
-    dockerStrategy:
+    type: Source
+    sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: openjdk-11:1.11
-    type: Docker
+        namespace: openshift
+        name: 'java:openjdk-17-ubi8'
   triggers:
   - generic:
       secret: c0wLiClWZtM_GAOXQmJ0
