@@ -36,7 +36,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: openjdk-11
+        name: openjdk-11:latest
     type: Docker
   triggers:
   - generic:
