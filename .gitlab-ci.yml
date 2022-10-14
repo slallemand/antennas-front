@@ -80,6 +80,6 @@ deploy:
   dependencies: 
     - maven-build
   script:    
-    - oc start-build $APP --from-dir=. --follow -n $NAMESPACE
-    - if oc expose service $APP -n $NAMESPACE; then echo "service exposed"; else echo "ignoring error, service probably already exposed"; fi
+    - oc start-build $APP --from-dir=. --follow 
+    - if oc expose service $APP; then echo "service exposed"; else echo "ignoring error, service probably already exposed"; fi
 
