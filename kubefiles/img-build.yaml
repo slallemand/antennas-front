@@ -1,0 +1,103 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: antennas-front:latest
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: git@gitlab.com:redhat-scholars/antennas-front.git
+    type: Git
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: openshift
+        name: 'java:openjdk-17-ubi8'
+  triggers:
+  - generic:
+      secret: c0wLiClWZtM_GAOXQmJ0
+    type: Generic
+  - type: ConfigChange
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deployment: antennas-front
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"antennas-front:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"antennas-front\")].image"}]'
+    openshift.io/generated-by: Gitlab
+  labels:
+    app: antennas-front
+    app.kubernetes.io/component: antennas-front
+    app.kubernetes.io/instance: antennas-front
+  name: antennas-front
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deployment: antennas-front
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        openshift.io/generated-by: Gitlab
+      labels:
+        deployment: antennas-front
+    spec:
+      containers:
+      - image: ' '
+        imagePullPolicy: IfNotPresent
+        name: antennas-front
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      restartPolicy: Always

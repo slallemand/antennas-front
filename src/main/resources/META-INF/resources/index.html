@@ -73,7 +73,7 @@
     <script>
         var connected = false;
         var socket;
-        socket = new WebSocket("ws://" + location.host + "/antennas");
+        socket = new WebSocket("wss://" + location.host + "/antennas");
         socket.onopen = function () {
             console.log("connected to WS")
         }
